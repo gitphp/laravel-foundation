@@ -1,0 +1,63 @@
+{
+    "name": "github/laravel-foundation",
+    "description": "Foundation utilities for Laravel 13: helpers, global middleware, form requests, API responses, JWT auth, logging, enums, cache, and string, number, array, and date tools.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "laravel13",
+        "jwt",
+        "api",
+        "helpers",
+        "middleware",
+        "enums"
+    ],
+    "authors": [
+        {
+            "name": "Sunny Yang"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "ext-bcmath": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "firebase/php-jwt": "^6.11 || ^7.0",
+        "laravel/framework": "^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sunny\\Foundation\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Sunny\\Foundation\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Sunny\\Foundation\\FoundationServiceProvider"
+            ],
+            "aliases": {
+                "Sunny": "Sunny\\Foundation\\Facades\\Sunny"
+            }
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
