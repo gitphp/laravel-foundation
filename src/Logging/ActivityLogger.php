@@ -2,8 +2,21 @@
 
 declare(strict_types=1);
 
+/**
+ * 活动日志
+ *
+ * @package     Sunny\Foundation\Logging
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Logging;
 
+/**
+ * 活动日志
+ */
 final class ActivityLogger
 {
     private const LEVELS = [
@@ -17,6 +30,9 @@ final class ActivityLogger
         'debug',
     ];
 
+    /**
+     * 写入指定级别的日志，并打码敏感字段。
+     */
     public function log(string $level, string $message, array $context = []): void
     {
         $level = strtolower($level);
@@ -39,36 +55,57 @@ final class ActivityLogger
         app('log')->channel($channel)->log($level, $message, $context);
     }
 
+    /**
+     * 记录调试日志。
+     */
     public function debug(string $message, array $context = []): void
     {
         $this->log('debug', $message, $context);
     }
 
+    /**
+     * 记录普通信息。
+     */
     public function info(string $message, array $context = []): void
     {
         $this->log('info', $message, $context);
     }
 
+    /**
+     * 记录需要关注但不算错误的信息。
+     */
     public function notice(string $message, array $context = []): void
     {
         $this->log('notice', $message, $context);
     }
 
+    /**
+     * 记录警告。
+     */
     public function warning(string $message, array $context = []): void
     {
         $this->log('warning', $message, $context);
     }
 
+    /**
+     * 记录错误。
+     */
     public function error(string $message, array $context = []): void
     {
         $this->log('error', $message, $context);
     }
 
+    /**
+     * 记录严重错误。
+     */
     public function critical(string $message, array $context = []): void
     {
         $this->log('critical', $message, $context);
     }
 
+    /**
+     * 记录异常的类名、消息和位置。默认不写堆栈。
+     */
     public function exception(\Throwable $exception, string $message = '', array $context = []): void
     {
         $details = [
@@ -78,6 +115,7 @@ final class ActivityLogger
             'line' => $exception->getLine(),
         ];
 
+        // 默认不写堆栈，避免把参数和路径带进日志。只有显式打开时才记录。
         if (config('sunny.log.trace') === true) {
             $details['trace'] = $exception->getTraceAsString();
         }
@@ -87,6 +125,8 @@ final class ActivityLogger
     }
 
     /**
+     * 递归清理上下文，并替换敏感键。
+     *
      * @param  array<mixed>  $context
      * @return array<mixed>
      */
@@ -95,6 +135,7 @@ final class ActivityLogger
         $clean = [];
 
         foreach ($context as $key => $value) {
+            // 密码、令牌等键整段替换，嵌套数组里的同名键也会处理。
             if (is_string($key) && $this->redacted($key)) {
                 $clean[$key] = '[redacted]';
 
@@ -107,6 +148,9 @@ final class ActivityLogger
         return $clean;
     }
 
+    /**
+     * 把对象转成类名，并截断过长的字符串。
+     */
     private function sanitizeValue(mixed $value, int $depth): mixed
     {
         if ($depth > 6) {
@@ -136,6 +180,9 @@ final class ActivityLogger
         return get_debug_type($value);
     }
 
+    /**
+     * 判断字段名是否在打码名单里，比较时忽略大小写。
+     */
     private function redacted(string $key): bool
     {
         $needles = config('sunny.log.redact', []);
@@ -155,3 +202,4 @@ final class ActivityLogger
         return false;
     }
 }
+

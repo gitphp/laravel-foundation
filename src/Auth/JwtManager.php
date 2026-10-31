@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * JWT 管理器
+ *
+ * @package     Sunny\Foundation\Auth
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Auth;
 
 use Firebase\JWT\BeforeValidException;
@@ -15,15 +25,23 @@ use Sunny\Foundation\Enums\JwtAlgorithm;
 use Sunny\Foundation\Support\Toolkit;
 use UnexpectedValueException;
 
+/**
+ * JWT 管理器
+ */
 final class JwtManager
 {
     private const RESERVED = ['iss', 'aud', 'iat', 'nbf', 'exp', 'jti', 'typ', 'sub'];
 
+    /**
+     * 黑名单存放在带前缀的缓存里。
+     */
     public function __construct(private readonly CacheRepository $cache)
     {
     }
 
     /**
+     * 为用户签发访问令牌和刷新令牌。
+     *
      * @param  array<string, mixed>  $claims
      */
     public function issue(string|int $subject, array $claims = [], ?int $ttl = null): TokenPair
@@ -41,10 +59,14 @@ final class JwtManager
         );
     }
 
+    /**
+     * 校验签名、过期时间、签发方和黑名单。默认只接受访问令牌。
+     */
     public function parse(string $token, ?string $expectedType = 'access'): JwtToken
     {
         $this->assertTokenShape($token);
 
+        // 时钟误差是 php-jwt 的全局静态值，验签结束后必须恢复。
         $previousLeeway = JWT::$leeway;
         JWT::$leeway = $this->leeway();
 
@@ -67,6 +89,7 @@ final class JwtManager
         $jwt = JwtToken::from($claims);
         $this->assertRegisteredClaims($jwt, $expectedType);
 
+        // 注销后的 jti 会留到原过期时间，这段时间内不能再使用。
         if ($this->cache->has($this->blacklistKey($jwt->id()))) {
             throw JwtException::revoked();
         }
@@ -75,21 +98,30 @@ final class JwtManager
     }
 
     /**
+     * 用刷新令牌换一组新令牌，并立即作废旧的刷新令牌。
+     *
      * @param  array<string, mixed>  $claims
      */
     public function refresh(string $refreshToken): TokenPair
     {
         $token = $this->parse($refreshToken, 'refresh');
+        // 先作废旧的刷新令牌，再签发新的一对，避免旧令牌还能再换一次。
         $this->blacklist($token);
 
         return $this->issue($token->subject(), $token->customClaims());
     }
 
+    /**
+     * 把令牌编号写入黑名单，直到它原本的过期时间。
+     */
     public function invalidate(string $token): void
     {
         $this->blacklist($this->parse($token, null));
     }
 
+    /**
+     * 注销访问令牌和可选的刷新令牌。已经过期的令牌视为注销成功。
+     */
     public function logout(?string $accessToken = null, ?string $refreshToken = null): void
     {
         $tokens = [$accessToken ?? $this->bearerFromRequest(), $refreshToken];
@@ -102,6 +134,7 @@ final class JwtManager
             try {
                 $this->invalidate($token);
             } catch (JwtException $exception) {
+                // 已经过期的令牌不能再用，注销时不算失败。
                 if (! $exception->isExpired()) {
                     throw $exception;
                 }
@@ -110,12 +143,15 @@ final class JwtManager
     }
 
     /**
+     * 写入注册声明并签名。调用方不能覆盖 exp、jti 等保留字段。
+     *
      * @param  array<string, mixed>  $claims
      */
     private function encode(string $subject, array $claims, int $ttl, string $type): string
     {
         $now = time();
         $payload = $claims;
+        // 保留声明只由服务端写入，调用方不能指定过期时间或令牌编号。
         $payload['sub'] = $subject;
         $payload['iat'] = $now;
         $payload['nbf'] = $now;
@@ -144,6 +180,9 @@ final class JwtManager
         return JWT::encode($payload, $this->signingKey(), $this->algorithm()->value);
     }
 
+    /**
+     * 在令牌剩余寿命内记住它的 jti。
+     */
     private function blacklist(JwtToken $token): void
     {
         $seconds = $token->expiresAt()->getTimestamp() - time();
@@ -155,11 +194,17 @@ final class JwtManager
         $this->cache->put($this->blacklistKey($token->id()), 1, $seconds);
     }
 
+    /**
+     * 黑名单缓存键。
+     */
     private function blacklistKey(string $jti): string
     {
         return 'jwt:blacklist:'.$jti;
     }
 
+    /**
+     * 拒绝空令牌、过长令牌和段数不对的字符串。
+     */
     private function assertTokenShape(string $token): void
     {
         if ($token === '' || strlen($token) > 8192 || substr_count($token, '.') !== 2) {
@@ -167,6 +212,9 @@ final class JwtManager
         }
     }
 
+    /**
+     * 检查必要声明、令牌类型、签发方和受众。
+     */
     private function assertRegisteredClaims(JwtToken $token, ?string $expectedType): void
     {
         foreach (['sub', 'iat', 'nbf', 'exp', 'jti', 'typ'] as $claim) {
@@ -206,6 +254,8 @@ final class JwtManager
     }
 
     /**
+     * 去掉保留声明，并限制声明的名称和值。
+     *
      * @param  array<string, mixed>  $claims
      * @return array<string, mixed>
      */
@@ -226,6 +276,9 @@ final class JwtManager
         return $claims;
     }
 
+    /**
+     * 声明只能是标量，或最多三层的标量数组。
+     */
     private function assertClaimValue(mixed $value, int $depth = 0): void
     {
         if (is_string($value) || is_int($value) || is_bool($value) || $value === null) {
@@ -251,6 +304,9 @@ final class JwtManager
         throw new InvalidArgumentException('JWT claims must be scalars or arrays of scalars.');
     }
 
+    /**
+     * 整理用户标识。空白或超长时拒绝签发。
+     */
     private function subject(string|int $subject): string
     {
         if (is_string($subject)) {
@@ -266,6 +322,9 @@ final class JwtManager
         return $subject;
     }
 
+    /**
+     * 有效期必须在 1 秒和配置上限之间。
+     */
     private function ttl(string $type, ?int $requested): int
     {
         $default = $type === 'refresh'
@@ -281,6 +340,9 @@ final class JwtManager
         return $ttl;
     }
 
+    /**
+     * 时钟误差最多 300 秒，避免把过期令牌放得太宽。
+     */
     private function leeway(): int
     {
         $leeway = (int) config('sunny.jwt.leeway', 0);
@@ -292,6 +354,9 @@ final class JwtManager
         return $leeway;
     }
 
+    /**
+     * 只接受 HS256 和 RS256。
+     */
     private function algorithm(): JwtAlgorithm
     {
         $value = config('sunny.jwt.algo', JwtAlgorithm::HS256->value);
@@ -304,6 +369,9 @@ final class JwtManager
         return $algorithm;
     }
 
+    /**
+     * 按算法选择签名密钥。
+     */
     private function signingKey(): string
     {
         return match ($this->algorithm()) {
@@ -312,6 +380,9 @@ final class JwtManager
         };
     }
 
+    /**
+     * 按算法选择验签密钥。HS256 与签名密钥相同。
+     */
     private function verificationKey(): string
     {
         return match ($this->algorithm()) {
@@ -320,6 +391,9 @@ final class JwtManager
         };
     }
 
+    /**
+     * HS256 密钥至少 32 个字符，不能使用空密钥。
+     */
     private function secret(): string
     {
         $secret = config('sunny.jwt.secret');
@@ -331,12 +405,16 @@ final class JwtManager
         return $secret;
     }
 
+    /**
+     * 读取 PEM 字符串或密钥文件。环境变量里的 \n 会还原成换行。
+     */
     private function pem(mixed $value, string $kind): string
     {
         if (! is_string($value) || trim($value) === '') {
             throw JwtException::misconfigured('Set the JWT '.$kind.' key before using RS256.');
         }
 
+        // .env 里的换行通常写成 \n 两个字符，这里还原成真正的换行。
         $value = str_replace('\\n', "\n", $value);
 
         if (is_file($value)) {
@@ -352,6 +430,9 @@ final class JwtManager
         return $value;
     }
 
+    /**
+     * 签发方。未单独配置时使用应用 URL。
+     */
     private function issuer(): ?string
     {
         $issuer = config('sunny.jwt.issuer');
@@ -363,6 +444,9 @@ final class JwtManager
         return is_string($issuer) && $issuer !== '' ? $issuer : null;
     }
 
+    /**
+     * 从当前请求的 Authorization 头读取 Bearer 令牌。
+     */
     private function bearerFromRequest(): ?string
     {
         if (! function_exists('request') || ! app()->bound('request')) {
@@ -374,3 +458,4 @@ final class JwtManager
         return is_string($token) && $token !== '' ? $token : null;
     }
 }
+

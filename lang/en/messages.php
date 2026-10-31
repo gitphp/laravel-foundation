@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * 英文语言包
+ *
+ * @package     Sunny\Foundation
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 return [
     'ok' => 'ok',
     'fail' => 'The request could not be completed.',
@@ -16,3 +26,4 @@ return [
     'decimal' => 'The :attribute must be a decimal number.',
     'decimal_scale' => 'The :attribute may have at most :scale decimal places.',
 ];
+

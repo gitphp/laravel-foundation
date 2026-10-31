@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * API 访问日志中间件
+ *
+ * @package     Sunny\Foundation\Http\Middleware
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Http\Middleware;
 
 use Closure;
@@ -11,8 +21,14 @@ use Sunny\Foundation\Logging\ActivityLogger;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
+/**
+ * API 访问日志中间件
+ */
 final class LogApiRequest
 {
+    /**
+     * 记录匹配路径的请求。异常仍会继续向外抛出。
+     */
     public function handle(Request $request, Closure $next): Response
     {
         if (! $this->shouldLog($request)) {
@@ -39,6 +55,9 @@ final class LogApiRequest
         return $response;
     }
 
+    /**
+     * 排除健康检查等路径后，判断是否落在日志路径里。
+     */
     private function shouldLog(Request $request): bool
     {
         $except = config('sunny.log.except', []);
@@ -62,11 +81,15 @@ final class LogApiRequest
         return $paths !== [] && $request->is(...$paths);
     }
 
+    /**
+     * 写入方法、路径、状态码、耗时和 IP，不记录请求体。
+     */
     private function write(Request $request, int $status, int $started): void
     {
         $path = $request->path();
         $milliseconds = (hrtime(true) - $started) / 1_000_000;
 
+        // 只记方法、路径、状态、耗时和 IP，不记请求体。用户编号来自属性，避免触发 session 守卫。
         app(ActivityLogger::class)->info('http.request', [
             'method' => $request->method(),
             'path' => $path === '/' ? '/' : '/'.$path,
@@ -77,3 +100,4 @@ final class LogApiRequest
         ]);
     }
 }
+

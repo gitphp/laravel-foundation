@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * 简体中文语言包
+ *
+ * @package     Sunny\Foundation
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 return [
     'ok' => 'ok',
     'fail' => '请求无法完成。',
@@ -16,3 +26,4 @@ return [
     'decimal' => ':attribute必须是数字。',
     'decimal_scale' => ':attribute最多保留 :scale 位小数。',
 ];
+

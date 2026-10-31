@@ -2,13 +2,29 @@
 
 declare(strict_types=1);
 
+/**
+ * 缓存测试
+ *
+ * @package     Sunny\Foundation\Tests\Cache
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Tests\Cache;
 
 use Sunny\Foundation\Cache\CacheRepository;
 use Sunny\Foundation\Tests\TestCase;
 
+/**
+ * 缓存测试
+ */
 class CacheRepositoryTest extends TestCase
 {
+    /**
+     * 缓存键应带前缀，重复读取不再执行闭包。
+     */
     public function test_it_prefixes_keys_and_remembers_values(): void
     {
         $cache = $this->app->make(CacheRepository::class);
@@ -33,3 +49,4 @@ class CacheRepositoryTest extends TestCase
         $this->assertFalse($cache->has('answer'));
     }
 }
+

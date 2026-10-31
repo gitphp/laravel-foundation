@@ -2,15 +2,33 @@
 
 declare(strict_types=1);
 
+/**
+ * 数组处理
+ *
+ * @package     Sunny\Foundation\Support
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Support;
 
+/**
+ * 数组处理
+ */
 final class Arr
 {
+    /**
+     * 工具类只提供静态方法。
+     */
     private function __construct()
     {
     }
 
     /**
+     * 按父子编号把扁平列表组装成树。编号重复时抛出异常。
+     *
      * @param  array<int, array<string, mixed>|object>  $items
      * @return array<int, array<string, mixed>>
      */
@@ -34,6 +52,7 @@ final class Arr
 
             $key = (string) $item[$id];
 
+            // 编号重复时父子关系无法确定，直接拒绝。
             if (isset($ids[$key])) {
                 throw new \InvalidArgumentException("Duplicate [{$id}] value [{$key}].");
             }
@@ -43,6 +62,7 @@ final class Arr
             $nodes[] = $item;
         }
 
+        // 先记下父编号对应的下标，再按值回填子节点，避免引用把节点挂错父级。
         $grouped = [];
 
         foreach ($nodes as $index => $node) {
@@ -72,6 +92,8 @@ final class Arr
     }
 
     /**
+     * 只保留指定的键。
+     *
      * @param  array<mixed>  $array
      * @param  array<int, int|string>  $keys
      * @return array<mixed>
@@ -90,6 +112,8 @@ final class Arr
     }
 
     /**
+     * 去掉指定的键。
+     *
      * @param  array<mixed>  $array
      * @param  array<int, int|string>  $keys
      * @return array<mixed>
@@ -106,6 +130,8 @@ final class Arr
     }
 
     /**
+     * 按映射表重命名键。
+     *
      * @param  array<mixed>  $array
      * @param  array<string, string>  $map
      * @return array<mixed>
@@ -126,6 +152,8 @@ final class Arr
     }
 
     /**
+     * 去掉值为 null 的项，并保留原键。
+     *
      * @param  array<mixed>  $array
      * @return array<mixed>
      */
@@ -135,6 +163,8 @@ final class Arr
     }
 
     /**
+     * 用某个字段的值作为新键。
+     *
      * @param  array<int, mixed>  $items
      * @return array<string, mixed>
      */
@@ -150,6 +180,8 @@ final class Arr
     }
 
     /**
+     * 按某个字段分组。
+     *
      * @param  array<int, mixed>  $items
      * @return array<string, array<int, mixed>>
      */
@@ -165,6 +197,8 @@ final class Arr
     }
 
     /**
+     * 按某个字段去重，保留第一次出现的项。
+     *
      * @param  array<int, mixed>  $items
      * @return array<int, mixed>
      */
@@ -188,6 +222,8 @@ final class Arr
     }
 
     /**
+     * 取出每一项的某个字段。
+     *
      * @param  array<int, mixed>  $items
      * @return array<int, mixed>
      */
@@ -203,6 +239,8 @@ final class Arr
     }
 
     /**
+     * 是否为关联数组。空数组视为列表。
+     *
      * @param  array<mixed>  $array
      */
     public static function isAssoc(array $array): bool
@@ -211,6 +249,8 @@ final class Arr
     }
 
     /**
+     * 第一项。空数组返回默认值。
+     *
      * @param  array<mixed>  $array
      */
     public static function first(array $array, mixed $default = null): mixed
@@ -225,6 +265,8 @@ final class Arr
     }
 
     /**
+     * 最后一项。空数组返回默认值。
+     *
      * @param  array<mixed>  $array
      */
     public static function last(array $array, mixed $default = null): mixed
@@ -239,6 +281,8 @@ final class Arr
     }
 
     /**
+     * 用点号读取嵌套值。
+     *
      * @param  array<mixed>  $array
      */
     public static function get(array $array, string|int|null $key, mixed $default = null): mixed
@@ -269,6 +313,8 @@ final class Arr
     }
 
     /**
+     * 用点号写入嵌套值，中间层不存在时自动创建数组。
+     *
      * @param  array<mixed>  $array
      * @return array<mixed>
      */
@@ -293,6 +339,9 @@ final class Arr
         return $array;
     }
 
+    /**
+     * 从数组或对象上读取一个字段。
+     */
     private static function read(mixed $item, string $key): mixed
     {
         if (is_array($item)) {
@@ -306,3 +355,4 @@ final class Arr
         return null;
     }
 }
+

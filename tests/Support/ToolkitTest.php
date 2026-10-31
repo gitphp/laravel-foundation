@@ -2,14 +2,30 @@
 
 declare(strict_types=1);
 
+/**
+ * 通用工具测试
+ *
+ * @package     Sunny\Foundation\Tests\Support
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Tests\Support;
 
 use RuntimeException;
 use Sunny\Foundation\Support\Toolkit;
 use Sunny\Foundation\Tests\TestCase;
 
+/**
+ * 通用工具测试
+ */
 class ToolkitTest extends TestCase
 {
+    /**
+     * UUID 版本 4 和字节格式化应符合约定。
+     */
     public function test_it_builds_a_uuid_and_formats_bytes(): void
     {
         $this->assertMatchesRegularExpression(
@@ -21,6 +37,9 @@ class ToolkitTest extends TestCase
         $this->assertTrue(Toolkit::filled('晴'));
     }
 
+    /**
+     * 重试应在成功的那一次返回结果。
+     */
     public function test_it_retries_until_the_callback_succeeds(): void
     {
         $attempts = 0;
@@ -39,3 +58,4 @@ class ToolkitTest extends TestCase
         $this->assertSame(2, $attempts);
     }
 }
+

@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * JWT 测试
+ *
+ * @package     Sunny\Foundation\Tests\Auth
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Tests\Auth;
 
 use Firebase\JWT\JWT;
@@ -11,8 +21,14 @@ use Sunny\Foundation\Auth\JwtException;
 use Sunny\Foundation\Auth\JwtManager;
 use Sunny\Foundation\Tests\TestCase;
 
+/**
+ * JWT 测试
+ */
 class JwtManagerTest extends TestCase
 {
+    /**
+     * 签发后的访问令牌应能解析出用户和自定义声明。
+     */
     public function test_it_issues_and_parses_an_access_token(): void
     {
         $manager = $this->app->make(JwtManager::class);
@@ -26,6 +42,9 @@ class JwtManagerTest extends TestCase
         $this->assertSame(3600, $pair->expiresIn);
     }
 
+    /**
+     * 刷新后旧的刷新令牌应进入黑名单。
+     */
     public function test_it_rotates_refresh_tokens(): void
     {
         $manager = $this->app->make(JwtManager::class);
@@ -43,6 +62,9 @@ class JwtManagerTest extends TestCase
         }
     }
 
+    /**
+     * 篡改签名或更换密钥后必须拒绝。
+     */
     public function test_it_rejects_a_tampered_token_and_the_wrong_secret(): void
     {
         $manager = $this->app->make(JwtManager::class);
@@ -67,6 +89,9 @@ class JwtManagerTest extends TestCase
         }
     }
 
+    /**
+     * 过期令牌和 none 算法必须拒绝。
+     */
     public function test_it_rejects_expired_tokens_and_unsupported_algorithms(): void
     {
         $token = JWT::encode([
@@ -96,6 +121,9 @@ class JwtManagerTest extends TestCase
         }
     }
 
+    /**
+     * 注销后访问令牌不能再使用。
+     */
     public function test_it_blacklists_tokens_on_logout(): void
     {
         $manager = $this->app->make(JwtManager::class);
@@ -110,6 +138,9 @@ class JwtManagerTest extends TestCase
         }
     }
 
+    /**
+     * 空用户标识和过大的声明不能签发。
+     */
     public function test_it_rejects_an_empty_subject_and_oversized_claims(): void
     {
         $manager = $this->app->make(JwtManager::class);
@@ -125,12 +156,16 @@ class JwtManagerTest extends TestCase
         $manager->issue('1', ['note' => str_repeat('晴', 2000)]);
     }
 
+    /**
+     * RS256 私钥签发、公钥验签应能往返。
+     */
     public function test_it_signs_with_rs256(): void
     {
         $options = [
             'private_key_bits' => 2048,
             'private_key_type' => OPENSSL_KEYTYPE_RSA,
         ];
+        // Windows 上的 PHP 需要显式带上 openssl.cnf，否则生成 RSA 密钥会失败。
         $opensslConfig = dirname(PHP_BINARY).DIRECTORY_SEPARATOR.'extras'.DIRECTORY_SEPARATOR.'ssl'.DIRECTORY_SEPARATOR.'openssl.cnf';
 
         if (is_file($opensslConfig)) {
@@ -160,6 +195,9 @@ class JwtManagerTest extends TestCase
         $this->assertSame('9', $token->subject());
     }
 
+    /**
+     * 中间件接受访问令牌，拒绝刷新令牌和匿名请求。
+     */
     public function test_middleware_accepts_access_tokens_and_rejects_refresh_tokens(): void
     {
         $this->app['router']->get('/api/me', function (Request $request) {
@@ -182,3 +220,4 @@ class JwtManagerTest extends TestCase
             ->assertUnauthorized();
     }
 }
+

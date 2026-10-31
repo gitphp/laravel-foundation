@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * 活动日志测试
+ *
+ * @package     Sunny\Foundation\Tests\Logging
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Tests\Logging;
 
 use Illuminate\Log\Events\MessageLogged;
@@ -10,8 +20,14 @@ use RuntimeException;
 use Sunny\Foundation\Logging\ActivityLogger;
 use Sunny\Foundation\Tests\TestCase;
 
+/**
+ * 活动日志测试
+ */
 class ActivityLoggerTest extends TestCase
 {
+    /**
+     * 密码和令牌字段应被打码，普通字段保留。
+     */
     public function test_it_redacts_sensitive_context(): void
     {
         $logs = [];
@@ -32,6 +48,9 @@ class ActivityLoggerTest extends TestCase
         $this->assertSame('[redacted]', $log->context['nested']['access_token'] ?? null);
     }
 
+    /**
+     * 默认只记异常类名和位置，不记堆栈。
+     */
     public function test_it_records_exception_class_without_a_trace_by_default(): void
     {
         $logs = [];
@@ -49,6 +68,8 @@ class ActivityLoggerTest extends TestCase
     }
 
     /**
+     * 从已捕获的日志里找出指定消息。
+     *
      * @param  array<int, MessageLogged>  $logs
      */
     private function findLog(array $logs, string $message): MessageLogged
@@ -62,3 +83,4 @@ class ActivityLoggerTest extends TestCase
         $this->fail('Log ['.$message.'] was not written.');
     }
 }
+

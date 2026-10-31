@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * Sunny 扩展包配置
+ *
+ * @package     Sunny\Foundation
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 use Sunny\Foundation\Auth\Middleware\AuthenticateJwt;
 use Sunny\Foundation\Http\Middleware\AssignRequestId;
 use Sunny\Foundation\Http\Middleware\ForceJsonResponse;
@@ -13,6 +23,8 @@ return [
     |--------------------------------------------------------------------------
     | Global middleware
     |--------------------------------------------------------------------------
+    |
+    | ????? HTTP ????? JSON ????????????????????????
     |
     | These middleware classes are pushed onto the HTTP kernel when enabled.
     | JSON forcing and access logs only apply to the configured path patterns,
@@ -54,6 +66,8 @@ return [
     | Logging
     |--------------------------------------------------------------------------
     |
+    | ?????????????????? IP???????redact ?????????
+    |
     | Request logs record the method, path, status, duration, and IP. Bodies
     | and credentials are not written. Keys listed in "redact" are replaced.
     |
@@ -83,6 +97,8 @@ return [
     | JWT
     |--------------------------------------------------------------------------
     |
+    | HS256 ???? 32 ???? SUNNY_JWT_SECRET?RS256 ?????????????? none?
+    |
     | HS256 requires SUNNY_JWT_SECRET (at least 32 characters). RS256 requires
     | a PEM private key for signing and a PEM public key for verification.
     | Only HS256 and RS256 are accepted. The "none" algorithm is rejected.
@@ -107,3 +123,4 @@ return [
     ],
 
 ];
+

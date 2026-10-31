@@ -2,12 +2,28 @@
 
 declare(strict_types=1);
 
+/**
+ * 助手函数测试
+ *
+ * @package     Sunny\Foundation\Tests
+ * @license     MIT License (MIT)
+ * @author      Sunny Yang <githup@163.com> QQ4873473
+ * @copyright   Copyright (c) 2026 Sunny Yang. All rights reserved.
+ * @link        http://www.budff.com
+ */
+
 namespace Sunny\Foundation\Tests;
 
 use Sunny\Foundation\SunnyManager;
 
+/**
+ * 助手函数测试
+ */
 class HelpersTest extends TestCase
 {
+    /**
+     * 助手函数应转到对应的服务和工具类。
+     */
     public function test_helpers_delegate_to_the_package_services(): void
     {
         $this->assertInstanceOf(SunnyManager::class, sunny());
@@ -25,3 +41,4 @@ class HelpersTest extends TestCase
         $this->assertSame(0, sunny_success(['ok' => true])->getData(true)['code']);
     }
 }
+
