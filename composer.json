@@ -1,5 +1,5 @@
 {
-    "name": "github/laravel-foundation",
+    "name": "gitphp/laravel-foundation",
     "description": "Foundation utilities for Laravel 13: helpers, global middleware, form requests, API responses, JWT auth, logging, enums, cache, and string, number, array, and date tools.",
     "type": "library",
     "license": "MIT",

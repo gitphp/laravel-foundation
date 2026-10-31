@@ -7,7 +7,7 @@
 ## 安装
 
 ```bash
-composer require sunny/laravel-foundation
+composer require gitphp/laravel-foundation
 php artisan vendor:publish --tag=sunny-config
 php artisan vendor:publish --tag=sunny-lang
 ```
